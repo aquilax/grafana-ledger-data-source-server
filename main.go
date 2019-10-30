@@ -208,7 +208,6 @@ func main() {
 			next.ServeHTTP(w, r)
 
 			addr := r.RemoteAddr
-
 			fmt.Printf("(%s) \"%s %s %s\" %s\n", addr, r.Method, r.RequestURI, r.Proto, time.Since(start))
 		}
 	}
