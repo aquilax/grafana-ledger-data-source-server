@@ -4,8 +4,9 @@ Grafana JSON DataSource server for Ledger-cli.
 
 This is a small Go backend server for using with Grafana's [SimpleJson](https://grafana.com/grafana/plugins/grafana-simple-json-datasource) DataSource plugin.
 
+**Note**: This is only a proof of concept project. Use it at your own risk.
 
-*Note*: This is only a proof of concept project. Use it at your own risk.
+![grafana-ledger-data-source-server](data/screenshot.png)
 
 ## Try it out
 
@@ -83,11 +84,12 @@ Liabilities:MasterCard
 Expenses:
 Expenses:Food:
 Expenses:Food:Dinner
-Expenses:Food:Lunch"
+Expenses:Food:Lunch
 ```
 
 For the names that end on `:`, the data will be aggregated for all accounts that start with the selected prefix. For example the value for `Expenses:Food:` will be `30.00` for `2015/10/12`.
 
 
-## Note
-The server uses the [howeyc/ledger](https://github.com/howeyc/ledger) package for parsing the ledger files and comes with all its limitations.
+## Notes
+* The transaction are currently read only when the server starts.
+* The server uses the [howeyc/ledger](https://github.com/howeyc/ledger) package for parsing the ledger files and comes with all its limitations.
