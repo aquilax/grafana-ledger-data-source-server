@@ -2,7 +2,7 @@
 
 Grafana JSON DataSource server for Ledger-cli.
 
-There is a hacky PHP alternative [here])(https://github.com/aquilax/grafana-ledger-data-source-php-server) which uses directly ledger-cli for data access.
+There is a hacky PHP alternative [here](https://github.com/aquilax/grafana-ledger-data-source-php-server) which uses directly ledger-cli for data access.
 
 This is a small Go backend server for using with Grafana's [SimpleJson](https://grafana.com/grafana/plugins/grafana-simple-json-datasource) DataSource plugin.
 
