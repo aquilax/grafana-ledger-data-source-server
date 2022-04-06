@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -98,19 +97,19 @@ func main() {
 	}
 
 	// Populate search result
-	t := make(map[string]bool)
+	t := make(map[string]struct{})
 	for idx := 0; idx < len(generalLedger); idx++ {
 		for i := 0; i < len(generalLedger[idx].AccountChanges); i++ {
 			for _, n := range getNames(generalLedger[idx].AccountChanges[i].Name) {
-				t[n] = true
+				t[n] = struct{}{}
 			}
 		}
 	}
 	searchResult := make([]string, len(t))
-	n := 0
+	i := 0
 	for key := range t {
-		searchResult[n] = key
-		n++
+		searchResult[i] = key
+		i++
 	}
 
 	getTargetData := func(target string, from, to time.Time) []DataPoint {
@@ -189,7 +188,7 @@ func main() {
 		w.Write([]byte("[]"))
 	}
 
-	cors := func(next http.HandlerFunc) http.HandlerFunc {
+	withCORS := func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
@@ -201,23 +200,30 @@ func main() {
 		}
 	}
 
-	logger := func(next http.HandlerFunc) http.HandlerFunc {
+	withLogger := func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 
 			next.ServeHTTP(w, r)
 
 			addr := r.RemoteAddr
-			fmt.Printf("(%s) \"%s %s %s\" %s\n", addr, r.Method, r.RequestURI, r.Proto, time.Since(start))
+			log.Printf("(%s) \"%s %s %s\" %s\n", addr, r.Method, r.RequestURI, r.Proto, time.Since(start))
 		}
 	}
 
-	http.HandleFunc("/", logger(cors(okHandler)))
-	http.HandleFunc("/search", logger(cors(searchHandler)))
-	http.HandleFunc("/query", logger(cors(queryHandler)))
-	http.HandleFunc("/annotations", logger(cors(annotationsHandler)))
-	http.HandleFunc("/tag-keys", logger(cors(tagKeysHandler)))
-	http.HandleFunc("/tag-values", logger(cors(tagValuesHandler)))
+	for _, c := range []struct {
+		route   string
+		handler http.HandlerFunc
+	}{
+		{"/", okHandler},
+		{"/search", searchHandler},
+		{"/query", queryHandler},
+		{"/annotations", annotationsHandler},
+		{"/tag-keys", tagKeysHandler},
+		{"/tag-values", tagValuesHandler},
+	} {
+		http.HandleFunc(c.route, withLogger(withCORS(c.handler)))
+	}
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
